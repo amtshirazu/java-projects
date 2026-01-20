@@ -1,0 +1,5 @@
+256 Ali Yilmaz Matematik 25
+956 Fatma Demir Fizik 30
+598 Ahmet Tas Kimya 20
+486 Ayse Celik Turkce 15
+756 Mehmet Oz Sosyal 35

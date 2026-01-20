@@ -1,0 +1,28 @@
+        String dosyaAdi = "urunler.txt";
+        try (BufferedReader br = new BufferedReader(new FileReader(dosyaAdi))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(","); 
+                String adi = parts[0];
+                int kategoriIndex = Integer.parseInt(parts[1]);
+                double birimAgirligi = Double.parseDouble(parts[2]);
+                double birimFiyati = Double.parseDouble(parts[3]);
+                int stokMiktari = Integer.parseInt(parts[4]);
+
+                switch (kategoriIndex) {
+                    case 1: // Beverages
+                        beveragesList.add(new Beverages(adi, kategoriIndex, birimAgirligi, birimFiyati, stokMiktari));
+                        break;
+                    case 2: // Condiments
+                        condimentsList.add(new Condiments(adi, kategoriIndex, birimAgirligi, birimFiyati, stokMiktari));
+                        break;
+                    case 3: // Confections
+                        confectionsList.add(new Confections(adi, kategoriIndex, birimAgirligi, birimFiyati, stokMiktari));
+                        break;
+                    default:
+                        System.out.println("Bilinmeyen kategori: " + kategoriIndex);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Dosya okuma hatası: " + e.getMessage());
+        }

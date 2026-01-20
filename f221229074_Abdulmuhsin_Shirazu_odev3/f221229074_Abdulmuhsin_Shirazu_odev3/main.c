@@ -1,0 +1,293 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define NodeSize 4//changing is required in other instances
+//#define NodeSize 2
+//#define NodeSize 5
+
+
+struct AdjacencyNodes
+{
+    int destination;
+    int time;
+    struct AdjacencyNodes* next;
+};
+
+struct AdjacencyList
+{
+    struct AdjacencyNodes* head;
+};
+
+
+struct Graph
+{
+    int NumOfNodes;
+    struct AdjacencyList* table;
+};
+
+struct Graph* intilialize(int NumOfNodes)
+{
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->NumOfNodes = NumOfNodes;
+    graph->table = (struct AdjacencyList*)malloc(NumOfNodes * sizeof(struct AdjacencyList));
+
+    for(int i=0; i<NumOfNodes; i++)
+    {
+        graph->table[i].head = NULL;
+    }
+
+    return graph;
+}
+
+struct Graph* createGraph(int rows, int col, int zaman[rows][col], struct Graph* graph, int start, int NumOfNodes);
+int isReachable(struct Graph* graph);
+struct Graph* addEdge(struct Graph* graph,int index,int destination,int time);
+void recursiveFind(struct Graph* graph,int index);
+struct AdjacencyNodes* createAdjacencyNodes(int destination,int time);
+
+int visited[NodeSize];
+int time[NodeSize];
+int indexOfNodesInAdList[NodeSize];
+
+int main()
+{
+
+    for(int i=0; i<NodeSize; i++)
+    {
+        visited[i] = 0;
+        time[i] = INT_MAX;
+    }
+
+    time[0] = 0;
+    visited[0] = 1;
+
+
+    /*int n = 2;
+    int k = 2;
+    int zaman[][3] = {{1, 2, 1}};
+    int rows = 1;
+    int col = 3;
+
+    indexOfNodesInAdList[0] = k;
+    indexOfNodesInAdList[1] = 1;
+    */
+
+    /*int n = 2;
+    int k = 1;
+    int zaman[][3] = {{1, 2, 1}};
+    int rows = 1;
+    int col = 3;
+
+    indexOfNodesInAdList[0] = k;
+    indexOfNodesInAdList[1] = 2;
+    */
+
+    /* int n = 5;//change required
+    int k = 2;//change required
+    int zaman[6][3] = {{2, 3, 1},{2, 1, 9},{3, 4, 1},{4,1,1},{1,5,3},{4,5,20}};
+    int rows = 6;//change required
+    int col = 3;//change required
+
+    indexOfNodesInAdList[0] = k;//change required
+    indexOfNodesInAdList[1] = 1;
+    indexOfNodesInAdList[2] = 3;
+    indexOfNodesInAdList[3] = 4;
+    indexOfNodesInAdList[4] = 5;
+    */
+
+
+    int n = 4;//change required
+    int k = 2;//change required
+    int zaman[][3] = {{2, 3, 1},{2, 1, 1},{3, 4, 1}};
+    int rows = 3;//change required
+    int col = 3;//change required
+
+    indexOfNodesInAdList[0] = k;//change required
+    indexOfNodesInAdList[1] = 1;
+    indexOfNodesInAdList[2] = 3;
+    indexOfNodesInAdList[3] = 4;
+
+
+    /*int zaman[][3] = {{1, 2, 1}, {1, 3, 2}, {2, 4, 3}, {3, 4, 1}};
+    int  n = 4, k = 1;
+    int rows = 3;//change required
+    int col = 3;//change required
+
+    indexOfNodesInAdList[0] = k;//change required
+    indexOfNodesInAdList[1] = 3;
+    indexOfNodesInAdList[2] = 2;
+    indexOfNodesInAdList[3] = 4;
+    */
+
+    int edge = sizeof(zaman) / sizeof(zaman[0]);
+    printf("edge %d\n", edge);
+
+    struct Graph* graph = intilialize(n);
+    graph = createGraph(rows,col,zaman,graph,k,edge);
+
+    int result = isReachable(graph);
+
+    if(result != -1)
+    {
+        for(int i=0; i<NodeSize; i++)
+        {
+            printf("time %d is %d\n", i, time[i]);
+            printf("visited %d is %d\n", i, visited[i]);
+        }
+        printf("The maximum distance is: %d", result);
+    }
+    else
+    {
+        printf("Some nodes are not reachable: result %d", result);
+    }
+
+
+}
+
+
+
+struct Graph* createGraph(int rows,int col,int zaman[rows][col],struct Graph* graph,int start,int edge)
+{
+
+    for(int i=0; i<edge; i++)
+    {
+        int source = zaman[i][0];
+        int destination = zaman[i][1];
+        int time = zaman[i][2];
+
+        for(int i=0; i<edge; i++)
+        {
+            if( source == indexOfNodesInAdList[i])
+            {
+                graph = addEdge(graph,i,destination,time);
+                break;
+            }
+        }
+
+
+    }
+
+    return graph;
+}
+
+struct Graph* addEdge(struct Graph* graph,int index,int destination,int time)
+{
+    struct AdjacencyNodes* newNode = createAdjacencyNodes(destination,time);
+    newNode->next = graph->table[index].head;
+    graph->table[index].head = newNode;
+
+    return graph;
+}
+
+
+
+struct AdjacencyNodes* createAdjacencyNodes(int destination,int time)
+{
+    struct AdjacencyNodes* newNode = (struct AdjacencyNodes*)malloc(sizeof(struct AdjacencyNodes));
+    newNode->destination = destination;
+    newNode->time = time;
+    newNode->next = NULL;
+
+    return newNode;
+}
+
+
+
+int isReachable(struct Graph* graph)
+{
+    struct AdjacencyNodes* temp = graph->table[0].head;
+    int prev = time[0];
+    int index;
+    while(temp != NULL)
+    {
+        for(int i=0; i<NodeSize; i++)
+        {
+            if(temp->destination == indexOfNodesInAdList[i])
+            {
+                index = i;
+                break;
+            }
+        }
+
+        if(visited[index] == 1)
+        {
+            if(time[index] < temp->time)
+            {
+                time[index] = temp->time;
+            }
+
+        }
+        else
+        {
+            time[index] = prev + temp->time;
+            visited[index] = 1;
+        }
+
+        recursiveFind(graph,index);
+
+        temp = temp->next;
+    }
+
+    int max_time = INT_MIN;
+    for(int i=0; i<NodeSize; i++)
+    {
+        // printf(" %d \n",time[i]);
+        printf(" %d \n",indexOfNodesInAdList[i]);
+        if(time[i] == INT_MAX)
+        {
+            return -1;
+        }
+        else
+        {
+            if(time[i] > max_time)
+            {
+                max_time = time[i];
+            }
+        }
+    }
+
+    return max_time;
+}
+
+
+void recursiveFind(struct Graph* graph,int index)
+{
+    struct AdjacencyNodes* temp = graph->table[index].head;
+    int prev = time[index];
+    int pos;
+    while(temp != NULL)
+    {
+        for(int i=0; i<NodeSize; i++)
+        {
+            if(temp->destination == indexOfNodesInAdList[i])
+            {
+                pos = i;
+                if(visited[pos] == 1)
+                {
+                    if(prev + temp->time > time[pos])
+                    {
+                        time[pos] = prev + temp->time;
+                    }
+
+                }
+
+
+                if(!visited[pos])
+                {
+                    time[pos] = prev + temp->time;
+                    visited[pos] = 1;
+                }
+                recursiveFind(graph,pos);
+            }
+        }
+
+
+        temp = temp->next ;
+    }
+
+    return;
+}
+
+
+
